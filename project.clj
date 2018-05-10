@@ -9,5 +9,5 @@
                     ; https://clojurescript.org/guides/quick-start#clojurescript-compiler
                     ; https://clojurescript.org/reference/dependencies
                    ]
-  :source-paths ["src/cljs"])
+  :source-paths ["src/cljc"])
 
