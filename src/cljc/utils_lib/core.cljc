@@ -183,3 +183,78 @@
 ; (clojure.core/slurp	(resource	file-path))
  )
 
+(def pass-key "password-key")
+
+(defn encrypt-password
+  ""
+  [password]
+  #?(:cljs
+      (let [pass-key-len (count pass-key)
+            pass-len (count password)
+            encrypted-password (atom "")]
+        (doseq [itr (range pass-len)]
+          (let [key-char (aget
+                           password
+                           itr)
+                pass-key-char (aget
+                                pass-key
+                                (mod
+                                  itr
+                                  pass-key-len))
+                key-char-code (.charCodeAt
+                                key-char
+                                0)
+                key-pass-code (+ (.charCodeAt
+                                   key-char
+                                   0)
+                                 (.charCodeAt
+                                   pass-key-char
+                                   0))
+                key-pass-char (.fromCharCode
+                                js/String
+                                key-pass-code)]
+            (swap!
+              encrypted-password
+              str
+              key-pass-char))
+         )
+         @encrypted-password))
+  )
+
+(defn decrypt-password
+  ""
+  [encrypted-password]
+  #?(:cljs
+      (let [pass-key-len (count pass-key)
+            pass-len (count
+                       encrypted-password)
+            decrypted-password (atom "")]
+        (doseq [itr (range pass-len)]
+          (let [key-char (aget
+                           encrypted-password
+                           itr)
+                pass-key-char (aget
+                                pass-key
+                                (mod
+                                  itr
+                                  pass-key-len))
+                key-char-code (.charCodeAt
+                                key-char
+                                0)
+                key-pass-code (- (.charCodeAt
+                                   key-char
+                                   0)
+                                 (.charCodeAt
+                                   pass-key-char
+                                   0))
+                key-pass-char (.fromCharCode
+                                js/String
+                                key-pass-code)]
+            (swap!
+              decrypted-password
+              str
+              key-pass-char))
+         )
+         @decrypted-password))
+  )
+
