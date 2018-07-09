@@ -15,23 +15,23 @@
   )
 
 (defn round-decimals
- ""
- [number
-  decimals-num]
- (let [number-i (int number)
-       number-ii (atom (- number
-                          number-i))
-       divider (atom 1)]
-  (doseq [itr (range decimals-num)]
-   (swap! number-ii * 10))
-  (swap! number-ii int)
-  (doseq [itr (range decimals-num)]
-   (swap! divider * 10))
-  (swap! number-ii / @divider)
-  (swap! number-ii double)
-  (+ number-i
-     @number-ii))
- )
+  "Round number to particular number of decimals"
+  [number
+   decimals-num]
+  (let [number-i (int number)
+        number-ii (atom (- number
+                           number-i))
+        divider (atom 1)]
+   (doseq [itr (range decimals-num)]
+    (swap! number-ii * 10))
+   (swap! number-ii int)
+   (doseq [itr (range decimals-num)]
+    (swap! divider * 10))
+   (swap! number-ii / @divider)
+   (swap! number-ii double)
+   (+ number-i
+      @number-ii))
+  )
 
 (defn find-index-to-remove
   "Additional function for remove-index-from-vector fn
@@ -147,46 +147,49 @@
   [data-vector
    element
    index]
-  (let [inserted-elements  (reduce (fn [acc
-                                        elem]
-                                    (let [itr  (:itr acc)
-                                          insert-on-index  (:insert-on-index acc)
-                                          insert-element  (:insert-element acc)
-                                          result  (:result acc)]
-                                     (if (= itr insert-on-index)
-                                      {:itr  (inc itr)
-                                       :insert-on-index  -1
-                                       :insert-element  []
-                                       :result (reduce conj
-                                                       result
-                                                       insert-element)}
-                                      {:itr  (inc itr)
-                                       :insert-on-index  insert-on-index
-                                       :insert-element  insert-element
-                                       :result (conj result
-                                                     elem)}))
-                                    )
-                                   {:itr 0
-                                    :insert-on-index index
-                                    :insert-element (if (vector? element)
-                                                        element
-                                                        [element])
-                                    :result []}
-                                   data-vector)]
+  (let [inserted-elements  (reduce
+                             (fn [acc
+                                  elem]
+                              (let [itr (:itr acc)
+                                    insert-on-index (:insert-on-index acc)
+                                    insert-element (:insert-element acc)
+                                    result  (:result acc)]
+                               (if (= itr insert-on-index)
+                                {:itr  (inc itr)
+                                 :insert-on-index -1
+                                 :insert-element []
+                                 :result (reduce
+                                           conj
+                                           result
+                                           insert-element)}
+                                {:itr (inc itr)
+                                 :insert-on-index insert-on-index
+                                 :insert-element insert-element
+                                 :result (conj
+                                           result
+                                           elem)}))
+                              )
+                             {:itr 0
+                              :insert-on-index index
+                              :insert-element (if (vector? element)
+                                                element
+                                                [element])
+                              :result []}
+                             data-vector)]
    (:result inserted-elements))
   )
 
 (defn read-file
- "example:
- file-pathe  public/index.html"
- [file-path]
-; (clojure.core/slurp	(resource	file-path))
- )
+  "example:
+  file-pathe  public/index.html"
+  [file-path]
+ ; (clojure.core/slurp	(resource	file-path))
+  )
 
 (def pass-key "password-key")
 
 (defn encrypt-password
-  ""
+  "Encrypt password"
   [password]
   #?(:cljs
       (let [pass-key-len (count pass-key)
@@ -222,7 +225,7 @@
   )
 
 (defn decrypt-password
-  ""
+  "Decrypt password"
   [encrypted-password]
   #?(:cljs
       (let [pass-key-len (count pass-key)
