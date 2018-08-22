@@ -125,12 +125,14 @@
                                                      elem)})
                                      ))
                                    {:itr 0
-                                    :replace-on-index (if (vector? index)
-                                                          index
-                                                          [index])
-                                    :replace-element (if (vector? element)
-                                                         element
-                                                         [element])
+                                    :replace-on-index (if (vector?
+                                                            index)
+                                                        index
+                                                        [index])
+                                    :replace-element (if (vector?
+                                                           index)
+                                                       element
+                                                       [element])
                                     :result []}
                                    data-vector)]
    (:result replaced-elements))
@@ -171,7 +173,8 @@
                               )
                              {:itr 0
                               :insert-on-index index
-                              :insert-element (if (vector? element)
+                              :insert-element (if (vector?
+                                                    element)
                                                 element
                                                 [element])
                               :result []}
