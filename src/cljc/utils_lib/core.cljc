@@ -264,3 +264,14 @@
          @decrypted-password))
   )
 
+(defn parse-body
+  "Read entity-body from request, convert from string to clojure data"
+  [request]
+  #?(:clj (try
+            (read-string
+              (:body request))
+            (catch Exception e
+              ;(println (.getMessage e))
+             ))
+     ))
+
