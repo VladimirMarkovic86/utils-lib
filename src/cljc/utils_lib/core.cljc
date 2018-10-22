@@ -194,7 +194,34 @@
 (defn encrypt-password
   "Encrypt password"
   [password]
-  #?(:cljs
+  #?(:clj
+      (let [pass-key-len (count pass-key)
+            pass-len (count password)
+            encrypted-password (atom "")]
+        (doseq [itr (range pass-len)]
+          (let [key-char (get
+                           password
+                           itr)
+                pass-key-char (get
+                                pass-key
+                                (mod
+                                  itr
+                                  pass-key-len))
+                key-char-code (int
+                                key-char)
+                pass-key-char-code (int
+                                     pass-key-char)
+                key-pass-code (+ key-char-code
+                                 pass-key-char-code)
+                key-pass-char (char
+                                key-pass-code)]
+            (swap!
+              encrypted-password
+              str
+              key-pass-char))
+         )
+         @encrypted-password)
+     :cljs
       (let [pass-key-len (count pass-key)
             pass-len (count password)
             encrypted-password (atom "")]
@@ -230,7 +257,35 @@
 (defn decrypt-password
   "Decrypt password"
   [encrypted-password]
-  #?(:cljs
+  #?(:clj
+      (let [pass-key-len (count pass-key)
+            pass-len (count
+                       encrypted-password)
+            decrypted-password (atom "")]
+        (doseq [itr (range pass-len)]
+          (let [key-char (get
+                           encrypted-password
+                           itr)
+                pass-key-char (get
+                                pass-key
+                                (mod
+                                  itr
+                                  pass-key-len))
+                key-char-code (int
+                                key-char)
+                pass-key-char-code (int
+                                     pass-key-char)
+                key-pass-code (- key-char-code
+                                 pass-key-char-code)
+                key-pass-char (char
+                                key-pass-code)]
+            (swap!
+              decrypted-password
+              str
+              key-pass-char))
+         )
+         @decrypted-password)
+     :cljs
       (let [pass-key-len (count pass-key)
             pass-len (count
                        encrypted-password)
