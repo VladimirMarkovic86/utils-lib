@@ -1,4 +1,4 @@
-(defproject org.clojars.vladimirmarkovic86/utils-lib "0.2.0"
+(defproject org.clojars.vladimirmarkovic86/utils-lib "0.3.0"
   :description "Utils library"
   :url "http://github.com/VladimirMarkovic86/utils-lib"
   :license {:name "Eclipse Public License"

@@ -319,6 +319,35 @@
          @decrypted-password))
   )
 
+(defn java-heap-size
+  ""
+  []
+  #?(:clj
+      (let [mb (* 1024
+                  1024)
+            runtime (Runtime/getRuntime)
+            used-memory (/ (- (.totalMemory
+                                runtime)
+                              (.freeMemory
+                                runtime))
+                           mb)
+            free-memory (/ (.freeMemory
+                             runtime)
+                           mb)
+            total-memory (/ (.totalMemory
+                               runtime)
+                             mb)
+            max-memory (/ (.maxMemory
+                            runtime)
+                          mb)]
+        (println "##### Heap utilization statistics [MB] #####")
+        (println "Used Memory: " (double used-memory))
+        (println "Free Memory: " (double free-memory))
+        (println "Total Memory:" (double total-memory))
+        (println "Max Memory:" (double max-memory))
+       ))
+ )
+
 (defn parse-body
   "Read entity-body from request, convert from string to clojure data"
   [request]
