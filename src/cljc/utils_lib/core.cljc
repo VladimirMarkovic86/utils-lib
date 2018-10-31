@@ -320,7 +320,7 @@
   )
 
 (defn java-heap-size
-  ""
+  "Print out java heap memory usage"
   []
   #?(:clj
       (let [mb (* 1024
