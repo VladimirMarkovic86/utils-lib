@@ -348,6 +348,22 @@
        ))
  )
 
+(defn current-date
+  "Returns formatted current date"
+  []
+  #?(:clj
+      (let [sdf (java.text.SimpleDateFormat.
+                  "E, dd MMM yyyy HH:mm:ss zzz")
+            date (java.util.Date.)]
+        (.setTimeZone
+          sdf
+          (java.util.TimeZone/getTimeZone
+            "GMT"))
+        (.format
+          sdf
+          date))
+     ))
+
 (defn parse-body
   "Read entity-body from request, convert from string to clojure data"
   [request]
