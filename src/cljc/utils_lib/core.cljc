@@ -375,3 +375,33 @@
              ))
      ))
 
+(defn split-with-newline
+  "Split text with newline without loosing empty rows"
+  [text]
+  (let [all-rows (atom [])
+        current-row (atom "")]
+    (doseq [c text]
+      (if (= c
+             \newline)
+        (do
+          (swap!
+            all-rows
+            conj
+            (swap!
+              current-row
+              str
+              \newline))
+          (reset!
+            current-row
+            ""))
+         (swap!
+           current-row
+           str
+           c))
+     )
+    (swap!
+      all-rows
+      conj
+      @current-row)
+    @all-rows))
+
