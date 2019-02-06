@@ -22,37 +22,36 @@
   "Round number to particular number of decimals"
   [number
    decimals-num]
-  (let [number-i (int
-                   number)
-        number-ii (atom (- number
-                           number-i))
-        divider (atom 1)]
-   (doseq [itr (range
-                 decimals-num)]
-    (swap!
-      number-ii
-      *
-      10))
-   (swap!
-     number-ii
-     int)
-   (doseq
-     [itr (range
-            decimals-num)]
-    (swap!
-      divider
-      *
-      10))
-   (swap!
-     number-ii
-     /
-     @divider)
-   (swap!
-     number-ii
-     double)
-   (+ number-i
-      @number-ii))
-  )
+  #?(:clj
+      (let [divider (atom 1)]
+        (doseq [itr (range
+                      decimals-num)]
+          (swap!
+            divider
+            *
+            10))
+        (double
+          (/ (Math/round
+               (* number
+                  @divider))
+             @divider))
+       )
+     :cljs
+      (let [divider (atom 1)]
+        (doseq [itr (range
+                      decimals-num)]
+          (swap!
+            divider
+            *
+            10))
+        (double
+          (/ (.round
+               js/Math
+               (* number
+                  @divider))
+             @divider))
+       ))
+ )
 
 (defn find-index-to-remove
   "Additional function for remove-index-from-vector fn
@@ -459,4 +458,18 @@
       conj
       @current-row)
     @all-rows))
+
+(defn is-number?
+  "Check if parameter is number or NaN"
+  [param]
+  #?(:clj nil
+     :cljs
+      (and (number?
+             param)
+           (not
+             (.isNaN
+               js/Number
+               param))
+       ))
+ )
 
