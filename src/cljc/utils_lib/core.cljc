@@ -516,3 +516,48 @@
        ))
  )
 
+(defn print-request
+  "Prints request map"
+  [request]
+  #?(:clj
+      (if-let [request-ws (:websocket request)]
+        (if (< (get-in
+                 request
+                 [:websocket
+                  :websocket-message-length])
+               300)
+          (println
+            (str
+              "\n"
+              request))
+          (println
+            (str
+              "\n"
+              (update-in
+                request
+                [:websocket]
+                dissoc
+                :websocket-message))
+           ))
+        (if-let [body (:body request)]
+          (if (< (read-string
+                   (:content-length request))
+                 300)
+            (println
+              (str
+                "\n"
+                request))
+            (println
+              (str
+                "\n"
+                (dissoc
+                  request
+                  :body))
+             ))
+          (println
+            (str
+              "\n"
+              request))
+         ))
+     :cljs nil))
+
