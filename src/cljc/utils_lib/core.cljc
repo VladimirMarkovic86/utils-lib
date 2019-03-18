@@ -1,4 +1,5 @@
-(ns utils-lib.core)
+(ns utils-lib.core
+  (:require [clojure.string :as cstring]))
 
 (defn round-up
   "Round up divided numbers"
@@ -23,105 +24,89 @@
   [number
    decimals-num]
   #?(:clj
-      (let [divider (atom 1)]
+      (let [divider (atom 1)
+            final-number (atom nil)]
         (doseq [itr (range
                       decimals-num)]
           (swap!
             divider
             *
             10))
-        (double
+        (reset!
+          final-number
           (/ (Math/round
-               (* number
+               (* (double
+                    number)
                   @divider))
              @divider))
+        (if (= @divider
+               1)
+          (int
+            @final-number)
+          (double
+            @final-number))
        )
      :cljs
-      (let [divider (atom 1)]
+      (let [divider (atom 1)
+            final-number (atom nil)]
         (doseq [itr (range
                       decimals-num)]
           (swap!
             divider
             *
             10))
-        (double
+        (reset!
+          final-number
           (/ (.round
                js/Math
-               (* number
+               (* (double
+                    number)
                   @divider))
              @divider))
+        (if (= @divider
+               1)
+          (int
+            @final-number)
+          (double
+            @final-number))
        ))
  )
-
-(defn find-index-to-remove
-  "Additional function for remove-index-from-vector fn
-   determine if index and data at that index in vector should be removed"
-  [itr
-   index-to-remove
-   current-index]
-  (if (< current-index
-         (count
-           index-to-remove))
-   (if (= itr
-          (index-to-remove
-            current-index))
-    current-index
-    (recur
-      itr
-      index-to-remove
-      (inc
-        current-index))
-    )
-   false))
 
 (defn remove-index-from-vector
   "Remove data at particular index or indexes
    
    data-vector is simple vector with elements of any data type
-   index is single number od vector of numbers that represent index/es
+   index is single number or vector of numbers that represent index/es
    that should be removed"
   [data-vector
    index]
-  (let [removed-index  (reduce
-                         (fn [acc
-                              elem]
-                           (let [itr (:itr acc)
-                                 index-to-remove (:index-to-remove acc)
-                                 result (:result acc)
-                                 compared-index (find-index-to-remove
-                                                  itr
-                                                  index-to-remove
-                                                  0)]
-                             (if compared-index
-                              (if (< (count
-                                       index-to-remove)
-                                     2)
-                               {:itr (inc
-                                       itr)
-                                :index-to-remove []
-                                :result result}
-                               {:itr (inc
-                                       itr)
-                                :index-to-remove (remove-index-from-vector
-                                                   index-to-remove
-                                                   compared-index)
-                                :result result})
-                              {:itr (inc
-                                      itr)
-                               :index-to-remove index-to-remove
-                               :result (conj
-                                         result
-                                         elem)})
-                            ))
-                         {:itr 0
-                          :index-to-remove (if (vector?
-                                                 index)
-                                             index
-                                             [index])
-                          :result []}
-                         data-vector)]
-   (:result removed-index))
- )
+  (let [indexes-to-remove (if (number?
+                                index)
+                            #{index}
+                            (when (or (seq?
+                                        index)
+                                      (vector?
+                                        index)
+                                      (set?
+                                        index))
+                              (into
+                                #{}
+                                index))
+                           )
+        result (atom [])]
+    (dotimes [i (count
+                  data-vector)]
+      (when-not (contains?
+                  indexes-to-remove
+                  i)
+        (swap!
+          result
+          conj
+          (get
+            data-vector
+            i))
+       ))
+    @result))
 
 (defn replace-in-vector-on-index
   "Replace data in vector on particular indexes
@@ -133,51 +118,118 @@
   [data-vector
    element
    index]
-  (let [replaced-elements (reduce
-                            (fn [acc
-                                 elem]
-                              (let [itr (:itr acc)
-                                    replace-on-index (:replace-on-index acc)
-                                    replace-element (:replace-element acc)
-                                    result (:result acc)
-                                    compared-index (find-index-to-remove
-                                                     itr
-                                                     replace-on-index
-                                                     0)]
-                                (if compared-index
-                                  {:itr (inc
-                                          itr)
-                                   :replace-on-index (remove-index-from-vector
-                                                       replace-on-index
-                                                       compared-index)
-                                   :replace-element (remove-index-from-vector
-                                                      replace-element
-                                                      compared-index)
-                                   :result (conj
-                                             result
-                                             (replace-element
-                                               compared-index))}
-                                  {:itr (inc
-                                          itr)
-                                   :replace-on-index replace-on-index
-                                   :replace-element replace-element
-                                   :result (conj
-                                             result
-                                             elem)})
-                               ))
-                            {:itr 0
-                             :replace-on-index (if (vector?
-                                                     index)
-                                                 index
-                                                 [index])
-                             :replace-element (if (vector?
-                                                    index)
-                                                element
-                                                [element])
-                             :result []}
-                            data-vector)]
-   (:result replaced-elements))
- )
+  (let [[new-elements
+         indexes-to-replace] (if (number?
+                                   index)
+                               [(atom
+                                  [element])
+                                (atom
+                                  [index])]
+                               (when (and (vector?
+                                            element)
+                                          (vector?
+                                            index))
+                                 [(atom
+                                    element)
+                                  (atom
+                                    index)])
+                              )
+        remove-first-fn (fn [param]
+                          (into
+                            []
+                            (rest
+                              param))
+                         )
+        result (atom [])]
+    (when (< (count
+               @new-elements)
+             (count
+               @indexes-to-replace))
+      (let [new-indexes (atom [])]
+        (dotimes [i (count
+                      @new-elements)]
+          (swap!
+            new-indexes
+            conj
+            (get
+              @indexes-to-replace
+              i))
+         )
+        (reset!
+          indexes-to-replace
+          @new-indexes))
+     )
+    (when (< (count
+               @indexes-to-replace)
+             (count
+               @new-elements))
+      (let [new-elements-a (atom [])]
+        (dotimes [i (count
+                      @indexes-to-replace)]
+          (swap!
+            new-elements-a
+            conj
+            (get
+              @new-elements
+              i))
+         )
+        (reset!
+          new-elements
+          @new-elements-a))
+     )
+    (when (= (count
+               @new-elements)
+             (count
+               @indexes-to-replace))
+      (dotimes [i (count
+                  data-vector)]
+        (let [index-to-replace (atom
+                                 (first
+                                   @indexes-to-replace))]
+          ((fn []
+             (when (and (not
+                          (nil?
+                            @index-to-replace))
+                        (< @index-to-replace
+                           0))
+               (swap!
+                 new-elements
+                 remove-first-fn)
+               (swap!
+                 indexes-to-replace
+                 remove-first-fn)
+               (reset!
+                 index-to-replace
+                 (first
+                   @indexes-to-replace))
+               (recur))
+            ))
+          (when (= @index-to-replace
+                   i)
+            (let [new-element (first
+                                @new-elements)]
+              (swap!
+                result
+                conj
+                new-element)
+              (swap!
+                new-elements
+                remove-first-fn)
+              (swap!
+                indexes-to-replace
+                remove-first-fn))
+           )
+          (when (not= @index-to-replace
+                      i)
+            (swap!
+              result
+              conj
+              (get
+                data-vector
+                i))
+           ))
+        ))
+    @result))
 
 (defn insert-in-vector-on-index
   "Insert data in vector
@@ -190,41 +242,116 @@
   [data-vector
    element
    index]
-  (let [inserted-elements  (reduce
-                             (fn [acc
-                                  elem]
-                               (let [itr (:itr acc)
-                                     insert-on-index (:insert-on-index acc)
-                                     insert-element (:insert-element acc)
-                                     result (:result acc)]
-                                 (if (= itr
-                                        insert-on-index)
-                                   {:itr (inc
-                                           itr)
-                                    :insert-on-index -1
-                                    :insert-element []
-                                    :result (reduce
-                                              conj
-                                              result
-                                              insert-element)}
-                                   {:itr (inc
-                                           itr)
-                                    :insert-on-index insert-on-index
-                                    :insert-element insert-element
-                                    :result (conj
-                                              result
-                                              elem)}))
+  (let [[new-elements
+         indexes-to-replace] (if (number?
+                                   index)
+                               [(atom
+                                  [element])
+                                (atom
+                                  [index])]
+                               (when (and (vector?
+                                            element)
+                                          (vector?
+                                            index))
+                                 [(atom
+                                    element)
+                                  (atom
+                                    index)])
                               )
-                             {:itr 0
-                              :insert-on-index index
-                              :insert-element (if (vector?
-                                                    element)
-                                                element
-                                                [element])
-                              :result []}
-                             data-vector)]
-   (:result inserted-elements))
-  )
+        remove-first-fn (fn [param]
+                          (into
+                            []
+                            (rest
+                              param))
+                         )
+        result (atom [])]
+    (when (< (count
+               @new-elements)
+             (count
+               @indexes-to-replace))
+      (let [new-indexes (atom [])]
+        (dotimes [i (count
+                      @new-elements)]
+          (swap!
+            new-indexes
+            conj
+            (get
+              @indexes-to-replace
+              i))
+         )
+        (reset!
+          indexes-to-replace
+          @new-indexes))
+     )
+    (when (< (count
+               @indexes-to-replace)
+             (count
+               @new-elements))
+      (let [new-elements-a (atom [])]
+        (dotimes [i (count
+                      @indexes-to-replace)]
+          (swap!
+            new-elements-a
+            conj
+            (get
+              @new-elements
+              i))
+         )
+        (reset!
+          new-elements
+          @new-elements-a))
+     )
+    (when (= (count
+               @new-elements)
+             (count
+               @indexes-to-replace))
+      (dotimes [i (count
+                  data-vector)]
+        (let [index-to-replace (atom
+                                 (first
+                                   @indexes-to-replace))]
+          ((fn []
+             (when (and (not
+                          (nil?
+                            @index-to-replace))
+                        (< @index-to-replace
+                           0))
+               (swap!
+                 new-elements
+                 remove-first-fn)
+               (swap!
+                 indexes-to-replace
+                 remove-first-fn)
+               (reset!
+                 index-to-replace
+                 (first
+                   @indexes-to-replace))
+               (recur))
+            ))
+          (when (= @index-to-replace
+                   i)
+            (let [new-element (first
+                                @new-elements)]
+              (swap!
+                result
+                conj
+                new-element)
+              (swap!
+                new-elements
+                remove-first-fn)
+              (swap!
+                indexes-to-replace
+                remove-first-fn))
+           )
+          (swap!
+            result
+            conj
+            (get
+              data-vector
+              i))
+         ))
+     )
+    @result))
 
 (defn read-file
   "example:
@@ -407,7 +534,7 @@
          )
         @hex-string)
      :cljs
-      (let [replaced-js-sha256 (clojure.string/replace-first
+      (let [replaced-js-sha256 (cstring/replace-first
                                  js-sha256
                                  "CHANGE_THIS_STRING"
                                  ascii)
@@ -437,40 +564,44 @@
             max-memory (/ (.maxMemory
                             runtime)
                           mb)]
-        (println "##### Heap utilization statistics [MB] #####")
-        (println "Used Memory: " (double used-memory))
-        (println "Free Memory: " (double free-memory))
-        (println "Total Memory:" (double total-memory))
-        (println "Max Memory:" (double max-memory))
-       ))
- )
+        {:used-memory (double used-memory)
+         :free-memory (double free-memory)
+         :total-memory (double total-memory)
+         :max-memory (double max-memory)})
+     ))
 
 (defn current-date
   "Returns formatted current date"
   []
   #?(:clj
       (let [sdf (java.text.SimpleDateFormat.
-                  "E, dd MMM yyyy HH:mm:ss zzz")
+                  "E, dd MMM yyyy, HH:mm:ss zzz")
             date (java.util.Date.)]
         (.setTimeZone
           sdf
           (java.util.TimeZone/getTimeZone
-            "GMT"))
+            "GMT+1"))
         (.format
           sdf
           date))
-     ))
-
-(defn parse-body
-  "Read entity-body from request, convert from string to clojure data"
-  [request]
-  #?(:clj (try
-            (read-string
-              (:body request))
-            (catch Exception e
-              ;(println (.getMessage e))
-             ))
-     ))
+     :cljs
+      (let [date (js/Date.)]
+        (.toLocaleString
+          date
+          "en-GB"
+          (js-obj
+            "timeZone" "Europe/Belgrade"
+            ;"timeZoneName" "short"
+            "weekday" "short"
+            "year" "numeric"
+            "month" "short"
+            "day" "numeric"
+            "hour" "2-digit"
+            "minute" "2-digit"
+            "second" "2-digit"
+            "hour12" false))
+       ))
+ )
 
 (defn split-with-newline
   "Split text with newline without loosing empty rows"
@@ -496,16 +627,19 @@
            str
            c))
      )
-    (swap!
-      all-rows
-      conj
-      @current-row)
+    (when-not (empty?
+                @current-row)
+      (swap!
+        all-rows
+        conj
+        @current-row))
     @all-rows))
 
 (defn is-number?
   "Check if parameter is number or NaN"
   [param]
-  #?(:clj nil
+  #?(:clj (number?
+            param)
      :cljs
       (and (number?
              param)
@@ -515,49 +649,4 @@
                param))
        ))
  )
-
-(defn print-request
-  "Prints request map"
-  [request]
-  #?(:clj
-      (if-let [request-ws (:websocket request)]
-        (if (< (get-in
-                 request
-                 [:websocket
-                  :websocket-message-length])
-               300)
-          (println
-            (str
-              "\n"
-              request))
-          (println
-            (str
-              "\n"
-              (update-in
-                request
-                [:websocket]
-                dissoc
-                :websocket-message))
-           ))
-        (if-let [body (:body request)]
-          (if (< (read-string
-                   (:content-length request))
-                 300)
-            (println
-              (str
-                "\n"
-                request))
-            (println
-              (str
-                "\n"
-                (dissoc
-                  request
-                  :body))
-             ))
-          (println
-            (str
-              "\n"
-              request))
-         ))
-     :cljs nil))
 
