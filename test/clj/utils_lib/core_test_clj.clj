@@ -1,6 +1,8 @@
 (ns utils-lib.core-test-clj
   (:require [clojure.test :refer :all]
-            [utils-lib.core :refer :all]))
+            [utils-lib.core :refer :all]
+            [utils-lib.core-clj :refer :all]
+            [clojure.string :as cstring]))
 
 (deftest test-java-heap-size
   (testing "Test java heap size function"
@@ -53,4 +55,55 @@
      )
 
    ))
+
+(deftest test-sh-exists?
+  
+  (testing "Test if sh file exists"
+    
+    (is
+      (instance?
+        java.lang.Boolean
+        (sh-exists?))
+     )
+    
+   )
+  
+ )
+
+(deftest test-make-sh-file
+  
+  (testing "Test make sh file"
+    
+    (make-sh-file)
+    
+    (is
+      (sh-exists?)
+     )
+    
+   )
+  
+ )
+
+(deftest test-execute-shell-command
+  
+  (testing "Test execute shell command"
+    
+    (let [result (execute-shell-command
+                   "ls /")
+          result-out (:out result)]
+      
+      (is
+        (not
+          (nil?
+            (cstring/index-of
+              result-out
+              "home"))
+         )
+       )
+      
+     )
+    
+   )
+  
+ )
 
