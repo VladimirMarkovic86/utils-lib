@@ -2,7 +2,9 @@
   (:require [clojure.test :refer [deftest is testing run-tests]]
             [utils-lib.core :refer [round-up round-decimals remove-index-from-vector
                                     replace-in-vector-on-index insert-in-vector-on-index
-                                    sha256 split-with-newline is-number?]]))
+                                    sha256 split-with-newline is-number? nth-root
+                                    calculate-circle-coordinates
+                                    get-quadrate-extreme-points find-quadrate]]))
 
 (deftest test-round-up
   (testing "Test round up function"
@@ -450,6 +452,411 @@
       (not
         (is-number?
           "1"))
+     )
+    
+   ))
+
+(deftest test-nth-root
+  (testing "Test nth root"
+    
+    (let [base nil
+          n nil
+          result (nth-root
+                   base
+                   n)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [base 4
+          n 2
+          result (nth-root
+                   base
+                   n)]
+      
+      (is
+        (= result
+           1.9999999999999998)
+       )
+      
+     )
+    
+    (let [base 8
+          n 3
+          result (nth-root
+                   base
+                   n)]
+      
+      (is
+        (= result
+           1.9999999999999998)
+       )
+      
+     )
+    
+    (let [base 25
+          n 2
+          result (nth-root
+                   base
+                   n)]
+      
+      (is
+        (= result
+           4.999999999999999)
+       )
+      
+     )
+    
+    (let [base 125
+          n 3
+          result (nth-root
+                   base
+                   n)]
+      
+      (is
+        (= result
+           4.9999999999999998)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-calculate-circle-coordinates
+  (testing "Test calculate circle coordinates"
+    
+    (let [r nil
+          angle nil
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [r 200
+          angle 0
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [200 0])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 45
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [141 141])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 90
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [0 200])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 135
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [-141 141])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 180
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [-200 0])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 225
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [-141 -141])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 270
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [0 -200])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 315
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [141 -141])
+       )
+      
+     )
+    
+    (let [r 200
+          angle 360
+          result (calculate-circle-coordinates
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           [200 0])
+       )
+      
+     )
+    
+   ))
+
+(deftest test-get-quadrate-extreme-points
+  (testing "Test get quadrate extreme points"
+    
+    (let [quadrate-number nil
+          radius nil
+          result (get-quadrate-extreme-points
+                   quadrate-number
+                   radius)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [quadrate-number 0
+          radius 200
+          result (get-quadrate-extreme-points
+                   quadrate-number
+                   radius)]
+      
+      (is
+        (= result
+           {:start [200 0]
+            :angle [200 200]
+            :end [0 200]})
+       )
+      
+     )
+    
+    (let [quadrate-number 1
+          radius 200
+          result (get-quadrate-extreme-points
+                   quadrate-number
+                   radius)]
+      
+      (is
+        (= result
+           {:start [0 200]
+            :angle [(- 200) 200]
+            :end [(- 200) 0]})
+       )
+      
+     )
+    
+    (let [quadrate-number 2
+          radius 200
+          result (get-quadrate-extreme-points
+                   quadrate-number
+                   radius)]
+      
+      (is
+        (= result
+           {:start [(- 200) 0]
+            :angle [(- 200) (- 200)]
+            :end [0 (- 200)]})
+       )
+      
+     )
+    
+    (let [quadrate-number 3
+          radius 200
+          result (get-quadrate-extreme-points
+                   quadrate-number
+                   radius)]
+      
+      (is
+        (= result
+           {:start [0 (- 200)]
+            :angle [200 (- 200)]
+            :end [200 0]})
+       )
+      
+     )
+    
+   ))
+
+(deftest test-find-quadrate
+  (testing "Test find quadrate"
+    
+    (let [x nil
+          y nil
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [x 0
+          y 0
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           0)
+       )
+      
+     )
+    
+    (let [x 1
+          y 0
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           0)
+       )
+      
+     )
+    
+    (let [x 1
+          y 1
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           0)
+       )
+      
+     )
+    
+    (let [x -1
+          y 0
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           1)
+       )
+      
+     )
+    
+    (let [x -1
+          y 1
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           1)
+       )
+      
+     )
+    
+    (let [x -1
+          y -1
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           2)
+       )
+      
+     )
+    
+    (let [x 0
+          y -1
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           3)
+       )
+      
+     )
+    
+    (let [x 1
+          y -1
+          result (find-quadrate
+                   x
+                   y)]
+      
+      (is
+        (= result
+           3)
+       )
+      
      )
     
    ))

@@ -650,3 +650,168 @@
        ))
  )
 
+(defn nth-root
+  "Calculates nth root of passed number"
+  [base
+   n]
+  #?(:clj (when (and base
+                     (number?
+                       base)
+                     n
+                     (number?
+                       n))
+            (Math/pow
+              Math/E
+              (/ (Math/log
+                   base)
+                 n))
+           )
+     :cljs (when (and base
+                     (number?
+                       base)
+                     n
+                     (number?
+                       n))
+             (.pow
+               js/Math
+               (aget
+                 js/Math
+                 "E")
+               (/ (.log
+                    js/Math
+                    base)
+                  n))
+            ))
+ )
+
+(defn calculate-circle-coordinates
+  "Calculates circle coordinates using diameter in pixels and angle in degrees"
+  [r
+   angle]
+  #?(:clj (when (and r
+                     (number?
+                       r)
+                     angle
+                     (number?
+                       angle))
+            (let [t (/ (* Math/PI
+                          angle)
+                       180)
+                  x (long
+                      (* (Math/cos
+                           t)
+                         r))
+                  y (long
+                      (* (Math/sin
+                           t)
+                         r))]
+              [x y]))
+     :cljs (when (and r
+                      (number?
+                        r)
+                      angle
+                      (number?
+                        angle))
+             (let [t (/ (* (aget
+                             js/Math
+                             "PI")
+                           angle)
+                        180)
+                   x (long
+                       (* (.cos
+                            js/Math
+                            t)
+                          r))
+                   y (long
+                       (* (.sin
+                            js/Math
+                            t)
+                          r))]
+               [x y]))
+     ))
+
+(defn get-quadrate-extreme-points
+  "Returns quadrate extreme points"
+  [quadrate-number
+   radius]
+  (when (and quadrate-number
+             (number?
+               quadrate-number)
+             radius
+             (number?
+               radius))
+    (let [result (atom nil)]
+      (when (= quadrate-number
+               0)
+        (reset!
+          result
+          {:start [radius 0]
+           :angle [radius radius]
+           :end [0 radius]}))
+      (when (= quadrate-number
+               1)
+        (reset!
+          result
+          {:start [0 radius]
+           :angle [(- radius) radius]
+           :end [(- radius) 0]}))
+      (when (= quadrate-number
+               2)
+        (reset!
+          result
+          {:start [(- radius) 0]
+           :angle [(- radius) (- radius)]
+           :end [0 (- radius)]})
+       )
+      (when (= quadrate-number
+               3)
+        (reset!
+          result
+          {:start [0 (- radius)]
+           :angle [radius (- radius)]
+           :end [radius 0]}))
+      @result))
+ )
+
+(defn find-quadrate
+  "Finds quadrate in which coordinates are"
+  [x
+   y]
+  (when (and x
+             (number?
+               x)
+             y
+             (number?
+               y))
+    (let [result (atom nil)]
+      (when (and (<= 0
+                     x)
+                 (<= 0
+                     y))
+        (reset!
+          result
+          0))
+      (when (and (< x
+                    0)
+                 (<= 0
+                     y))
+        (reset!
+          result
+          1))
+      (when (and (< x
+                    0)
+                 (< y
+                    0))
+        (reset!
+          result
+          2))
+      (when (and (<= 0
+                     x)
+                 (< y
+                    0))
+        (reset!
+          result
+          3))
+      @result))
+ )
+
