@@ -4,7 +4,13 @@
                                     replace-in-vector-on-index insert-in-vector-on-index
                                     sha256 split-with-newline is-number? nth-root
                                     calculate-circle-coordinates
-                                    get-quadrate-extreme-points find-quadrate]]))
+                                    get-quadrate-extreme-points find-quadrate
+                                    find-quadrate-by-angle calculate-angle
+                                    calculate-angle-by-coordinates-asin
+                                    calculate-angle-by-coordinates-acos
+                                    calculate-radius-by-x
+                                    calculate-radius-by-y
+                                    rotate-x rotate-y rotate-coordinates]]))
 
 (deftest test-round-up
   (testing "Test round up function"
@@ -687,7 +693,9 @@
         (= result
            {:start [200 0]
             :angle [200 200]
-            :end [0 200]})
+            :end [0 200]
+            :start-angle 0
+            :end-angle 90})
        )
       
      )
@@ -702,7 +710,9 @@
         (= result
            {:start [0 200]
             :angle [(- 200) 200]
-            :end [(- 200) 0]})
+            :end [(- 200) 0]
+            :start-angle 90
+            :end-angle 180})
        )
       
      )
@@ -717,7 +727,9 @@
         (= result
            {:start [(- 200) 0]
             :angle [(- 200) (- 200)]
-            :end [0 (- 200)]})
+            :end [0 (- 200)]
+            :start-angle 180
+            :end-angle 270})
        )
       
      )
@@ -732,7 +744,9 @@
         (= result
            {:start [0 (- 200)]
             :angle [200 (- 200)]
-            :end [200 0]})
+            :end [200 0]
+            :start-angle 270
+            :end-angle 360})
        )
       
      )
@@ -855,6 +869,580 @@
       (is
         (= result
            3)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-find-quadrate-by-angle
+  (testing "Test find quadrate by angle"
+    
+    (let [start-angle nil
+          end-angle nil
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [start-angle 0
+          end-angle 90
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [0])
+       )
+      
+     )
+    
+    (let [start-angle 90
+          end-angle 180
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [1])
+       )
+      
+     )
+    
+    (let [start-angle 180
+          end-angle 270
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [2])
+       )
+      
+     )
+    
+    (let [start-angle 270
+          end-angle 360
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [3])
+       )
+      
+     )
+    
+    (let [start-angle 0
+          end-angle 360
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [0 1 2 3])
+       )
+      
+     )
+    
+    (let [start-angle 30
+          end-angle 150
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [0 1])
+       )
+      
+     )
+    
+    (let [start-angle 200
+          end-angle 290
+          result (find-quadrate-by-angle
+                   start-angle
+                   end-angle)]
+      
+      (is
+        (= result
+           [2 3])
+       )
+      
+     )
+    
+   ))
+
+(deftest test-calculate-angle
+  (testing "Test calculate angle"
+    
+    (let [angle-degrees nil
+          result (calculate-angle
+                   angle-degrees)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [angle-degrees 0
+          result (calculate-angle
+                   angle-degrees)]
+      
+      (is
+        (= result
+           6.283185307179586)
+       )
+      
+     )
+    
+    (let [angle-degrees 90
+          result (calculate-angle
+                   angle-degrees)]
+      
+      (is
+        (= result
+           4.71238898038469)
+       )
+      
+     )
+    
+    (let [angle-degrees 180
+          result (calculate-angle
+                   angle-degrees)]
+      
+      (is
+        (= result
+           3.141592653589793)
+       )
+      
+     )
+    
+    (let [angle-degrees 270
+          result (calculate-angle
+                   angle-degrees)]
+      
+      (is
+        (= result
+           1.5707963267948966)
+       )
+      
+     )
+    
+    (let [angle-degrees 360
+          result (calculate-angle
+                   angle-degrees)]
+      
+      (is
+        (= result
+           6.283185307179586)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-calculate-angle-by-coordinates-asin
+  (testing "Test calculate angle by coordinates asin"
+    
+    (let [x nil
+          y nil
+          result (calculate-angle-by-coordinates-asin
+                   x
+                   y)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [x 0
+          y 1
+          result (calculate-angle-by-coordinates-asin
+                   x
+                   y)]
+      
+      (is
+        (= result
+           90.0)
+       )
+      
+     )
+    
+    (let [x 1
+          y 1
+          result (calculate-angle-by-coordinates-asin
+                   x
+                   y)]
+      
+      (is
+        (= result
+           45.00000000000001)
+       )
+      
+     )
+    
+    (let [x -1
+          y 1
+          result (calculate-angle-by-coordinates-asin
+                   x
+                   y)]
+      
+      (is
+        (= result
+           45.00000000000001)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-calculate-angle-by-coordinates-acos
+  (testing "Test calculate angle by coordinates acos"
+    
+    (let [x nil
+          y nil
+          result (calculate-angle-by-coordinates-acos
+                   x
+                   y)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [x 1
+          y 0
+          result (calculate-angle-by-coordinates-acos
+                   x
+                   y)]
+      
+      (is
+        (= result
+           0.0)
+       )
+      
+     )
+    
+    (let [x 1
+          y 1
+          result (calculate-angle-by-coordinates-acos
+                   x
+                   y)]
+      
+      (is
+        (= result
+           45.0)
+       )
+      
+     )
+    
+    (let [x 1
+          y -1
+          result (calculate-angle-by-coordinates-acos
+                   x
+                   y)]
+      
+      (is
+        (= result
+           45.0)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-calculate-radius-by-x
+  (testing "Test calculate radius by x"
+    
+    (let [x nil
+          angle nil
+          result (calculate-radius-by-x
+                   x
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [x 0
+          angle 90
+          result (calculate-radius-by-x
+                   x
+                   angle)]
+      
+      (is
+        (= result
+           0.0)
+       )
+      
+     )
+    
+    (let [x 0
+          angle 0
+          result (calculate-radius-by-x
+                   x
+                   angle)]
+      
+      (is
+        (= result
+           0.0)
+       )
+      
+     )
+    
+    (let [x 10
+          angle 20
+          result (calculate-radius-by-x
+                   x
+                   angle)]
+      
+      (is
+        (= result
+           10.641777724759121)
+       )
+      
+     )
+    
+    (let [x 50
+          angle 20
+          result (calculate-radius-by-x
+                   x
+                   angle)]
+      
+      (is
+        (= result
+           53.2088886237956)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-calculate-radius-by-y
+  (testing "Test calculate radius by y"
+    
+    (let [y nil
+          angle nil
+          result (calculate-radius-by-y
+                   y
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [y 0
+          angle 0
+          result (calculate-radius-by-y
+                   y
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [y 0
+          angle 90
+          result (calculate-radius-by-y
+                   y
+                   angle)]
+      
+      (is
+        (= result
+           0.0)
+       )
+      
+     )
+    
+    (let [y 10
+          angle 20
+          result (calculate-radius-by-y
+                   y
+                   angle)]
+      
+      (is
+        (= result
+           29.238044001630875)
+       )
+      
+     )
+    
+    (let [y 50
+          angle 20
+          result (calculate-radius-by-y
+                   y
+                   angle)]
+      
+      (is
+        (= result
+           146.19022000815437)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-rotate-x
+  (testing "Test rotate x"
+    
+    (let [r nil
+          angle nil
+          result (rotate-x
+                   r
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [r 100
+          angle 20
+          result (rotate-x
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           93.96926207859084)
+       )
+      
+     )
+    
+    (let [r 100
+          angle 70
+          result (rotate-x
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           34.20201433256688)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-rotate-y
+  (testing "Test rotate y"
+    
+    (let [r nil
+          angle nil
+          result (rotate-y
+                   r
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [r 100
+          angle 20
+          result (rotate-y
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           34.20201433256687)
+       )
+      
+     )
+    
+    (let [r 100
+          angle 70
+          result (rotate-y
+                   r
+                   angle)]
+      
+      (is
+        (= result
+           93.96926207859083)
+       )
+      
+     )
+    
+   ))
+
+(deftest test-rotate-coordinates
+  (testing "Test rotate coordinates"
+    
+    (let [x nil
+          y nil
+          angle nil
+          result (rotate-coordinates
+                   x
+                   y
+                   angle)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [x 100
+          y 0
+          angle 45
+          result (rotate-coordinates
+                   x
+                   y
+                   angle)]
+      
+      (is
+        (= result
+           [70.71067811865476
+            70.71067811865474])
+       )
+      
+     )
+    
+    (let [x 50
+          y 20
+          angle 90
+          result (rotate-coordinates
+                   x
+                   y
+                   angle)]
+      
+      (is
+        (= result
+           [-20.000000000000007
+            50.0])
        )
       
      )

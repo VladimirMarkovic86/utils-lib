@@ -1,6 +1,31 @@
 (ns utils-lib.core-clj
   (:require [clojure.java.shell :refer [sh]]))
 
+(defn java-heap-size
+  "Print out java heap memory usage"
+  []
+  (let [mb (* 1024
+              1024)
+        runtime (Runtime/getRuntime)
+        used-memory (/ (- (.totalMemory
+                            runtime)
+                          (.freeMemory
+                            runtime))
+                       mb)
+        free-memory (/ (.freeMemory
+                         runtime)
+                       mb)
+        total-memory (/ (.totalMemory
+                           runtime)
+                         mb)
+        max-memory (/ (.maxMemory
+                        runtime)
+                      mb)]
+    {:used-memory (double used-memory)
+     :free-memory (double free-memory)
+     :total-memory (double total-memory)
+     :max-memory (double max-memory)}))
+
 (defn sh-exists?
   "Check if sh file exists"
   []

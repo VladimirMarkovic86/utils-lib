@@ -541,34 +541,7 @@
             hex-string (js/eval
                          replaced-js-sha256)]
         hex-string))
-  )
-
-(defn java-heap-size
-  "Print out java heap memory usage"
-  []
-  #?(:clj
-      (let [mb (* 1024
-                  1024)
-            runtime (Runtime/getRuntime)
-            used-memory (/ (- (.totalMemory
-                                runtime)
-                              (.freeMemory
-                                runtime))
-                           mb)
-            free-memory (/ (.freeMemory
-                             runtime)
-                           mb)
-            total-memory (/ (.totalMemory
-                               runtime)
-                             mb)
-            max-memory (/ (.maxMemory
-                            runtime)
-                          mb)]
-        {:used-memory (double used-memory)
-         :free-memory (double free-memory)
-         :total-memory (double total-memory)
-         :max-memory (double max-memory)})
-     ))
+ )
 
 (defn current-date
   "Returns formatted current date"
@@ -747,21 +720,27 @@
           result
           {:start [radius 0]
            :angle [radius radius]
-           :end [0 radius]}))
+           :end [0 radius]
+           :start-angle 0
+           :end-angle 90}))
       (when (= quadrate-number
                1)
         (reset!
           result
           {:start [0 radius]
            :angle [(- radius) radius]
-           :end [(- radius) 0]}))
+           :end [(- radius) 0]
+           :start-angle 90
+           :end-angle 180}))
       (when (= quadrate-number
                2)
         (reset!
           result
           {:start [(- radius) 0]
            :angle [(- radius) (- radius)]
-           :end [0 (- radius)]})
+           :end [0 (- radius)]
+           :start-angle 180
+           :end-angle 270})
        )
       (when (= quadrate-number
                3)
@@ -769,7 +748,9 @@
           result
           {:start [0 (- radius)]
            :angle [radius (- radius)]
-           :end [radius 0]}))
+           :end [radius 0]
+           :start-angle 270
+           :end-angle 360}))
       @result))
  )
 
@@ -813,5 +794,358 @@
           result
           3))
       @result))
+ )
+
+(defn find-quadrate-by-angle
+  "Finds quadrates that contain passed angles"
+  [start-angle
+   end-angle]
+  (when (and start-angle
+             (number?
+               start-angle)
+             end-angle
+             (number?
+               end-angle))
+    (let [start-quadrate (atom 0)
+          end-quadrate (atom 0)]
+      (when (and (<= 0
+                     start-angle)
+                 (< start-angle
+                    90))
+        (reset!
+          start-quadrate
+          0))
+      (when (and (< 0
+                    end-angle)
+                 (<= end-angle
+                     90))
+        (reset!
+          end-quadrate
+          0))
+      (when (and (<= 90
+                     start-angle)
+                 (< start-angle
+                    180))
+        (reset!
+          start-quadrate
+          1))
+      (when (and (< 90
+                    end-angle)
+                 (<= end-angle
+                     180))
+        (reset!
+          end-quadrate
+          1))
+      (when (and (<= 180
+                     start-angle)
+                 (< start-angle
+                    270))
+        (reset!
+          start-quadrate
+          2))
+      (when (and (< 180
+                    end-angle)
+                 (<= end-angle
+                     270))
+        (reset!
+          end-quadrate
+          2))
+      (when (and (<= 270
+                     start-angle)
+                 (< start-angle
+                    360))
+        (reset!
+          start-quadrate
+          3))
+      (when (and (< 270
+                    end-angle)
+                 (<= end-angle
+                     360))
+        (reset!
+          end-quadrate
+          3))
+      (into
+        []
+        (range
+          @start-quadrate
+          (inc
+            @end-quadrate))
+       ))
+   ))
+
+(defn calculate-angle
+  "Calculates PI representation of angle"
+  [angle-degrees]
+  (when (and angle-degrees
+             (number?
+               angle-degrees))
+    (let [adapted-angle (mod
+                          angle-degrees
+                          360)
+          adapted-angle (- 360
+                           adapted-angle)]
+      (/ (* #?(:clj Math/PI
+               :cljs (aget
+                       js/Math
+                       "PI"))
+            adapted-angle)
+         180))
+   ))
+
+(defn calculate-angle-by-coordinates-asin
+  "Calculates angle by coordinates asin"
+  [x
+   y]
+  (when (and x
+             (number?
+               x)
+             y
+             (number?
+               y)
+             (not= y
+                   0))
+    #?(:clj (let [angle (Math/asin
+                          (Math/sqrt
+                            (/ 1
+                               (+ 1
+                                  (Math/pow
+                                    (/ x
+                                       y)
+                                    2))
+                             ))
+                         )]
+              (/ (* angle
+                    180)
+                 Math/PI))
+       :cljs (let [angle (.asin
+                           js/Math
+                           (.sqrt
+                             js/Math
+                             (/ 1
+                                (+ 1
+                                   (.pow
+                                     js/Math
+                                     (/ x
+                                        y)
+                                     2))
+                              ))
+                          )]
+               (/ (* angle
+                     180)
+                  (aget
+                    js/Math
+                    "PI"))
+              ))
+   ))
+
+(defn calculate-angle-by-coordinates-acos
+  "Calculates angle by coordinates acos"
+  [x
+   y]
+  (when (and x
+             (number?
+               x)
+             (not= x
+                   0)
+             y
+             (number?
+               y))
+    #?(:clj (let [angle (Math/acos
+                          (Math/sqrt
+                            (/ 1
+                               (+ 1
+                                  (Math/pow
+                                    (/ y
+                                       x)
+                                    2))
+                             ))
+                         )]
+              (/ (* angle
+                    180)
+                 Math/PI))
+       :cljs (let [angle (.acos
+                           js/Math
+                           (.sqrt
+                             js/Math
+                             (/ 1
+                                (+ 1
+                                   (.pow
+                                     js/Math
+                                     (/ y
+                                        x)
+                                     2))
+                              ))
+                          )]
+               (/ (* angle
+                     180)
+                  (aget
+                    js/Math
+                    "PI"))
+              ))
+   ))
+
+(defn calculate-radius-by-x
+  "Calculate radius by x coordinate"
+  [x
+   angle]
+  (when (and x
+             (number?
+               x)
+             angle
+             (number?
+               angle))
+    #?(:clj (let [angle-pi (/ (* Math/PI
+                                 angle)
+                              180)
+                  cos-angle-pi (Math/cos
+                                 angle-pi)]
+              (when (not= cos-angle-pi
+                          0.0)
+                (/ x
+                   cos-angle-pi))
+             )
+       :cljs (let [angle-pi (/ (* (aget
+                                    js/Math
+                                    "PI")
+                                  angle)
+                               180)
+                   cos-angle-pi (.cos
+                                  js/Math
+                                  angle-pi)]
+               (when (not= cos-angle-pi
+                           0.0)
+                 (/ x
+                    cos-angle-pi))
+              ))
+   ))
+
+(defn calculate-radius-by-y
+  "Calculate radius by x coordinate"
+  [y
+   angle]
+  (when (and y
+             (number?
+               y)
+             angle
+             (number?
+               angle))
+    #?(:clj (let [angle-pi (/ (* Math/PI
+                                 angle)
+                              180)
+                  sin-angle-pi (Math/sin
+                                 angle-pi)]
+              (when (not= sin-angle-pi
+                          0.0)
+                (/ y
+                   sin-angle-pi))
+             )
+       :cljs (let [angle-pi (/ (* (aget
+                                    js/Math
+                                    "PI")
+                                  angle)
+                               180)
+                   sin-angle-pi (.sin
+                                  js/Math
+                                  angle-pi)]
+               (when (not= sin-angle-pi
+                           0.0)
+                 (/ y
+                    sin-angle-pi))
+              ))
+   ))
+
+(defn rotate-x
+  "Rotate x coordinate for radius and angle"
+  [r
+   angle]
+  (when (and r
+             (number?
+               r)
+             angle
+             (number?
+               angle))
+    #?(:clj (let [angle-pi (/ (* Math/PI
+                                 angle)
+                              180)]
+              (* r
+                 (Math/cos
+                   angle-pi))
+             )
+       :cljs (let [angle-pi (/ (* (aget
+                                    js/Math
+                                    "PI")
+                                  angle)
+                               180)]
+               (* r
+                  (.cos
+                    js/Math
+                    angle-pi))
+              ))
+   ))
+
+(defn rotate-y
+  "Rotate y coordinate for radius and angle"
+  [r
+   angle]
+  (when (and r
+             (number?
+               r)
+             angle
+             (number?
+               angle))
+    #?(:clj (let [angle-pi (/ (* Math/PI
+                                 angle)
+                              180)]
+              (* r
+                 (Math/sin
+                   angle-pi))
+             )
+       :cljs (let [angle-pi (/ (* (aget
+                                    js/Math
+                                    "PI")
+                                  angle)
+                               180)]
+               (* r
+                  (.sin
+                    js/Math
+                    angle-pi))
+              ))
+   ))
+
+(defn rotate-coordinates
+  "Rotates x and y coordinates"
+  [x
+   y
+   angle]
+  (when (and x
+             (number?
+               x)
+             y
+             (number?
+               y)
+             angle
+             (number?
+               angle))
+    (let [c-angle (calculate-angle-by-coordinates-asin
+                    x
+                    y)
+          c-angle (if c-angle
+                    c-angle
+                    (calculate-angle-by-coordinates-acos
+                      x
+                      y))
+          radius (calculate-radius-by-x
+                   x
+                   c-angle)
+          rotated-x (rotate-x
+                      radius
+                      (+ c-angle
+                         angle))
+          rotated-y (rotate-y
+                      radius
+                      (+ c-angle
+                         angle))]
+      [rotated-x
+       rotated-y]))
  )
 
