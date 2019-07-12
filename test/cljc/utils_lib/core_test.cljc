@@ -8,9 +8,10 @@
                                     find-quadrate-by-angle calculate-angle
                                     calculate-angle-by-coordinates-asin
                                     calculate-angle-by-coordinates-acos
-                                    calculate-radius-by-x
-                                    calculate-radius-by-y
-                                    rotate-x rotate-y rotate-coordinates]]))
+                                    calculate-radius-by-x calculate-radius-by-y
+                                    rotate-x rotate-y rotate-coordinates decode-ascii
+                                    format-bytes-number
+                                    format-bytes-number-with-lowest-number-of-digits]]))
 
 (deftest test-round-up
   (testing "Test round up function"
@@ -1443,6 +1444,178 @@
         (= result
            [-20.000000000000007
             50.0])
+       )
+      
+     )
+    
+   ))
+
+(deftest test-decode-ascii
+  (testing "Test decode ascii"
+    
+    (let [text nil
+          result (decode-ascii
+                   text)]
+      
+      (is
+        (string?
+          result)
+       )
+      
+      (is
+        (empty?
+          result)
+       )
+      
+     )
+    
+    (let [text ""
+          result (decode-ascii
+                   text)]
+      
+      (is
+        (string?
+          result)
+       )
+      
+      (is
+        (empty?
+          result)
+       )
+      
+     )
+    
+    (let [text "test%20test"
+          result (decode-ascii
+                   text)]
+      
+      (is
+        (string?
+          result)
+       )
+      
+      (is
+        (= result
+           "test test")
+       )
+      
+     )
+    
+   ))
+
+(deftest test-format-bytes-number
+  (testing "Test format bytes number"
+    
+    (let [number-of-bytes nil
+          unit-type nil
+          result (format-bytes-number
+                   number-of-bytes
+                   unit-type)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [number-of-bytes 123
+          unit-type nil
+          result (format-bytes-number
+                   number-of-bytes
+                   unit-type)]
+      
+      (is
+        (= result
+           "123.0 B")
+       )
+      
+     )
+    
+    (let [number-of-bytes 1024
+          unit-type "KB"
+          result (format-bytes-number
+                   number-of-bytes
+                   unit-type)]
+      
+      (is
+        (= result
+           "1.0 KB")
+       )
+      
+     )
+    
+    (let [number-of-bytes 4000
+          unit-type "KB"
+          result (format-bytes-number
+                   number-of-bytes
+                   unit-type)]
+      
+      (is
+        (= result
+           "3.91 KB")
+       )
+      
+     )
+    
+    (let [number-of-bytes 4000000
+          unit-type "MB"
+          result (format-bytes-number
+                   number-of-bytes
+                   unit-type)]
+      
+      (is
+        (= result
+           "3.81 MB")
+       )
+      
+     )
+    
+   ))
+
+(deftest test-format-bytes-number-with-lowest-number-of-digits
+  (testing "Test format bytes number with lowest number of digits"
+    
+    (let [number-of-bytes nil
+          result (format-bytes-number-with-lowest-number-of-digits
+                   number-of-bytes)]
+      
+      (is
+        (nil?
+          result)
+       )
+      
+     )
+    
+    (let [number-of-bytes 1024
+          result (format-bytes-number-with-lowest-number-of-digits
+                   number-of-bytes)]
+      
+      (is
+        (= result
+           "1.0 KB")
+       )
+      
+     )
+    
+    (let [number-of-bytes 4000
+          result (format-bytes-number-with-lowest-number-of-digits
+                   number-of-bytes)]
+      
+      (is
+        (= result
+           "3.91 KB")
+       )
+      
+     )
+    
+    (let [number-of-bytes 4000000
+          result (format-bytes-number-with-lowest-number-of-digits
+                   number-of-bytes)]
+      
+      (is
+        (= result
+           "3.81 MB")
        )
       
      )

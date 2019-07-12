@@ -1,5 +1,6 @@
 (ns utils-lib.core
-  (:require [clojure.string :as cstring]))
+  (:require [clojure.string :as cstring]
+            [utils-lib.constants :as const]))
 
 (defn round-up
   "Round up divided numbers"
@@ -1147,5 +1148,150 @@
                          angle))]
       [rotated-x
        rotated-y]))
+ )
+
+(defn decode-ascii
+  "Decodes from utf-8 to ascii"
+  [text]
+  (if (string?
+        text)
+    (let [special-characters const/utf-8-ascii-mapping
+          text-decoded-a (atom text)]
+      (doseq [[escaped-special-character
+               special-character] special-characters]
+        (reset!
+          text-decoded-a
+          (cstring/replace
+            @text-decoded-a
+            special-character
+            escaped-special-character))
+       )
+      @text-decoded-a)
+    ""))
+
+(defn format-bytes-number
+  "Formats bytes in B, KB, MB, GB and TB"
+  [number-of-bytes
+   unit-type]
+  (when (number?
+          number-of-bytes)
+    (case unit-type
+      "B" (str
+            (round-decimals
+              number-of-bytes
+              2)
+            " B")
+      "KB" (str
+             (round-decimals
+               (double
+                 (/ number-of-bytes
+                    1024))
+               2)
+             " KB")
+      "MB" (str
+             (round-decimals
+               (double
+                 (/ number-of-bytes
+                    (* 1024
+                       1024))
+                )
+               2)
+             " MB")
+      "GB" (str
+             (round-decimals
+               (double
+                 (/ number-of-bytes
+                    (* 1024
+                       1024
+                       1024))
+                )
+               2)
+             " GB")
+      "TB" (str
+             (round-decimals
+               (double
+                 (/ number-of-bytes
+                    (* 1024
+                       1024
+                       1024
+                       1024))
+                )
+               2)
+             " TB")
+      (str
+        (round-decimals
+          number-of-bytes
+          2)
+        " B"))
+   ))
+
+(defn format-bytes-number-with-lowest-number-of-digits
+  "Formats number of bytes with lowest number of digits"
+  [number-of-bytes]
+  (when (number?
+          number-of-bytes)
+    (let [result (atom number-of-bytes)]
+      (when (< 0
+               number-of-bytes
+               1024)
+        (reset!
+          result
+          (format-bytes-number
+            number-of-bytes
+            "B"))
+       )
+      (when (<= 1024
+                number-of-bytes
+                (* 1024
+                   1024))
+        (reset!
+          result
+          (format-bytes-number
+            number-of-bytes
+            "KB"))
+       )
+      (when (< (* 1024
+                  1024)
+                number-of-bytes
+                (* 1024
+                   1024
+                   1024))
+        (reset!
+          result
+          (format-bytes-number
+            number-of-bytes
+            "MB"))
+       )
+      (when (<= (* 1024
+                   1024
+                   1024)
+                 number-of-bytes
+                 (* 1024
+                    1024
+                    1024
+                    1024))
+        (reset!
+          result
+          (format-bytes-number
+            number-of-bytes
+            "GB"))
+       )
+      (when (< (* 1024
+                  1024
+                  1024
+                  1024)
+                number-of-bytes
+                (* 1024
+                   1024
+                   1024
+                   1024
+                   1024))
+        (reset!
+          result
+          (format-bytes-number
+            number-of-bytes
+            "TB"))
+       )
+      @result))
  )
 

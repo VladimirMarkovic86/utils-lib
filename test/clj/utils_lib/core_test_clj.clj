@@ -25,6 +25,25 @@
     
    ))
 
+(deftest test-java-available-processors
+  (testing "Test java available processors"
+    
+    (let [result (java-available-processors)]
+      
+      (is
+        (number?
+          result)
+       )
+      
+      (is
+        (< 0
+           result)
+       )
+      
+     )
+    
+   ))
+
 (deftest test-current-date
   (testing "Test current date"
     
@@ -57,7 +76,6 @@
    ))
 
 (deftest test-sh-exists?
-  
   (testing "Test if sh file exists"
     
     (is
@@ -66,12 +84,9 @@
         (sh-exists?))
      )
     
-   )
-  
- )
+   ))
 
 (deftest test-make-sh-file
-  
   (testing "Test make sh file"
     
     (make-sh-file)
@@ -80,12 +95,9 @@
       (sh-exists?)
      )
     
-   )
-  
- )
+   ))
 
 (deftest test-execute-shell-command
-  
   (testing "Test execute shell command"
     
     (let [result (execute-shell-command
@@ -103,7 +115,20 @@
       
      )
     
-   )
-  
- )
+   ))
+
+(deftest test-get-lan-ip4-address
+  (testing "Test get lan ip4 address"
+    
+    (let [result (get-lan-ip4-address)]
+      
+      (is
+        (cstring/index-of
+          result
+          "192.168.1.")
+       )
+      
+     )
+    
+   ))
 

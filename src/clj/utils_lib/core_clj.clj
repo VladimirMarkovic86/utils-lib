@@ -1,5 +1,6 @@
 (ns utils-lib.core-clj
-  (:require [clojure.java.shell :refer [sh]]))
+  (:require [clojure.java.shell :refer [sh]]
+            [clojure.string :as cstring]))
 
 (defn java-heap-size
   "Print out java heap memory usage"
@@ -25,6 +26,13 @@
      :free-memory (double free-memory)
      :total-memory (double total-memory)
      :max-memory (double max-memory)}))
+
+(defn java-available-processors
+  "Returns number of available processors"
+  []
+  (.availableProcessors
+    (Runtime/getRuntime))
+ )
 
 (defn sh-exists?
   "Check if sh file exists"
@@ -98,6 +106,35 @@
         (apply
           sh
           @final-command))
+     )
+    @result))
+
+(defn get-lan-ip4-address
+  "Returns ip v4 address"
+  []
+  (let [nets (java.net.NetworkInterface/getNetworkInterfaces)
+        nets-coll (java.util.Collections/list
+                    nets)
+        result (atom nil)]
+    (doseq [inet nets-coll]
+      (when (not= (.getName
+                    inet)
+                  "lo")
+        (let [inet-addresses (.getInetAddresses
+                               inet)
+              inet-addresses-coll (java.util.Collections/list
+                                    inet-addresses)]
+          (doseq [inet-address inet-addresses-coll]
+            (let [ip-address (.getHostAddress
+                               inet-address)]
+              (when (cstring/index-of
+                      ip-address
+                      "192.168.1.")
+                (reset!
+                  result
+                  ip-address))
+             ))
+         ))
      )
     @result))
 
