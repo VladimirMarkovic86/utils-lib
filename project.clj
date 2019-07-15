@@ -1,4 +1,4 @@
-(defproject org.clojars.vladimirmarkovic86/utils-lib "0.4.10"
+(defproject org.clojars.vladimirmarkovic86/utils-lib "0.4.11"
   :description "Utils library"
   :url "http://github.com/VladimirMarkovic86/utils-lib"
   :license {:name "Eclipse Public License"
@@ -11,6 +11,8 @@
   
   :source-paths ["src/clj" "src/cljc"]
   :test-paths ["test/clj" "test/cljc"]
+  
+  :jar-exclusions [#"^public/"]
 
   :plugins [[lein-cljsbuild  "1.1.7"]
             [lein-doo "0.1.11"]
