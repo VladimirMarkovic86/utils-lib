@@ -7,7 +7,7 @@ Utils library is clojure/script project that implements useful clojure functions
 You can use this project as dependencie in clojure projects by listing it in project.clj
 
 ```
-[org.clojars.vladimirmarkovic86/utils-lib "0.3.0"]
+[org.clojars.vladimirmarkovic86/utils-lib "0.4.13"]
 ```
 
 ## Authors
